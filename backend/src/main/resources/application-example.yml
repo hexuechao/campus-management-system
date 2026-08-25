@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: campus-management-backend
+  datasource:
+    url: jdbc:mysql://localhost:3306/campus_management?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: root
+    password: your real password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
