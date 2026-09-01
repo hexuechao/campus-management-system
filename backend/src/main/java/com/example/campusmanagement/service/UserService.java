@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface UserService {
 
-    List<User> listUsers();
+    List<User> listUsers(String keyword);
 
     boolean createUser(User user);
 

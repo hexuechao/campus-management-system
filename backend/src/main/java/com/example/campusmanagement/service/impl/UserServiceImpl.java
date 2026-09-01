@@ -4,6 +4,8 @@ import com.example.campusmanagement.entity.User;
 import com.example.campusmanagement.mapper.UserMapper;
 import com.example.campusmanagement.service.UserService;
 import org.springframework.stereotype.Service;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -17,8 +19,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> listUsers() {
-        return userMapper.selectList(null);
+    public List<User> listUsers(String keyword) {
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+
+        if(StringUtils.hasText(keyword)) {
+            String trimmedKeyword = keyword.trim();
+
+            queryWrapper.and(wrapper -> wrapper.like(User::getUsername, trimmedKeyword)
+                        .or()
+                        .like(User::getName,trimmedKeyword));
+        }
+        return userMapper.selectList(queryWrapper);
     }
 
     @Override
