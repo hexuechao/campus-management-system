@@ -3,6 +3,7 @@ package com.example.campusmanagement.service.impl;
 import com.example.campusmanagement.entity.User;
 import com.example.campusmanagement.mapper.UserMapper;
 import com.example.campusmanagement.service.UserService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.springframework.util.StringUtils;
@@ -13,9 +14,12 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserMapper userMapper) {
+    public UserServiceImpl(UserMapper userMapper, BCryptPasswordEncoder passwordEncoder) {
+
         this.userMapper = userMapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -36,6 +40,7 @@ public class UserServiceImpl implements UserService {
     public boolean createUser(User user) {
         user.setId(null);
         user.setCreateTime(null);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userMapper.insert(user) > 0;
     }
 

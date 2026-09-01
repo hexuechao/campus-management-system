@@ -176,3 +176,46 @@ Do not implement yet:
 - Docker
 - Vue Router
 - Pinia
+
+## Current Progress
+
+Completed:
+- Spring Boot backend initialized
+- Vue frontend initialized
+- MySQL connected
+- User list implemented
+- User create/update/delete implemented
+- User search implemented
+- User frontend CRUD and search implemented
+- User management features have been manually tested
+
+## Current Goal
+
+Implement basic username/password login.
+
+For the first login implementation:
+- Use POST /api/login
+- Accept username and password
+- Query the user by username
+- Verify the password
+- Return a simple login success/failure response
+- Keep the implementation simple and suitable for learning
+
+Do NOT add yet:
+- JWT
+- Spring Security
+- Role/permission system
+- Refresh tokens
+- Redis
+- OAuth
+- Complex authentication architecture
+
+The basic login flow should be understood and tested first before adding JWT or authentication middleware.
+
+## Development Constraints
+
+- Keep the existing project structure and coding style where possible.
+- Avoid unnecessary refactoring.
+- Do not modify unrelated working features.
+- User management CRUD and search must continue to work.
+- Prefer simple implementations appropriate for a learning project.
