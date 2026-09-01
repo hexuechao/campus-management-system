@@ -1,7 +1,8 @@
 import axios from 'axios'
 
-export function getUserList() {
-  return axios.get('/api/users')
+export function getUserList(keyword) {
+  const params = keyword ? { keyword } : {}
+  return axios.get('/api/users', { params })
 }
 
 export function createUser(user) {

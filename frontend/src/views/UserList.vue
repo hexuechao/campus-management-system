@@ -6,6 +6,8 @@ import { createUser, deleteUser, getUserList, updateUser } from '../api/user'
 const users = ref([])
 const loading = ref(false)
 const errorMessage = ref('')
+const keyword = ref('')
+const activeKeyword = ref('')
 const dialogVisible = ref(false)
 const dialogMode = ref('create')
 const submitting = ref(false)
@@ -28,7 +30,7 @@ async function loadUsers() {
   errorMessage.value = ''
 
   try {
-    const response = await getUserList()
+    const response = await getUserList(activeKeyword.value)
     users.value = response.data
   } catch (error) {
     console.error('获取用户列表失败：', error)
@@ -36,6 +38,17 @@ async function loadUsers() {
   } finally {
     loading.value = false
   }
+}
+
+function handleSearch() {
+  activeKeyword.value = keyword.value.trim()
+  loadUsers()
+}
+
+function handleReset() {
+  keyword.value = ''
+  activeKeyword.value = ''
+  loadUsers()
 }
 
 function formatCreateTime(createTime) {
@@ -146,6 +159,17 @@ onMounted(loadUsers)
       <el-button type="primary" @click="openCreateDialog">新增用户</el-button>
     </div>
 
+    <div class="search-bar">
+      <el-input
+        v-model="keyword"
+        placeholder="请输入用户名或姓名"
+        clearable
+        @keyup.enter="handleSearch"
+      />
+      <el-button type="primary" @click="handleSearch">搜索</el-button>
+      <el-button @click="handleReset">重置</el-button>
+    </div>
+
     <el-alert
       v-if="errorMessage"
       :title="errorMessage"
@@ -244,6 +268,16 @@ h1 {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 24px;
+}
+
+.search-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.search-bar .el-input {
+  width: 280px;
 }
 
 .el-alert {
