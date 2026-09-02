@@ -1,8 +1,11 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useRouter } from 'vue-router'
 import { createUser, deleteUser, getUserList, updateUser } from '../api/user'
+import { clearToken } from '../utils/token'
 
+const router = useRouter()
 const users = ref([])
 const loading = ref(false)
 const errorMessage = ref('')
@@ -49,6 +52,11 @@ function handleReset() {
   keyword.value = ''
   activeKeyword.value = ''
   loadUsers()
+}
+
+function handleLogout() {
+  clearToken()
+  router.replace('/login')
 }
 
 function formatCreateTime(createTime) {
@@ -156,7 +164,10 @@ onMounted(loadUsers)
   <main class="user-list-page">
     <div class="page-header">
       <h1>校园用户列表</h1>
-      <el-button type="primary" @click="openCreateDialog">新增用户</el-button>
+      <div class="header-actions">
+        <el-button type="primary" @click="openCreateDialog">新增用户</el-button>
+        <el-button @click="handleLogout">退出登录</el-button>
+      </div>
     </div>
 
     <div class="search-bar">
@@ -268,6 +279,11 @@ h1 {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 24px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
 }
 
 .search-bar {
