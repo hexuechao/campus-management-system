@@ -2,6 +2,8 @@ package com.example.campusmanagement.controller;
 
 import com.example.campusmanagement.entity.User;
 import com.example.campusmanagement.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,5 +36,12 @@ public class UserController {
     @DeleteMapping("/{id}")
     public boolean deleteUser(@PathVariable Long id) {
         return userService.deleteUser(id);
+    }
+
+    @GetMapping("/me")
+    public String getCurrentUser(
+            HttpServletRequest request) {
+
+        return (String) request.getAttribute("username");
     }
 }

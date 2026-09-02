@@ -56,4 +56,11 @@ public class UserServiceImpl implements UserService {
     public boolean deleteUser(Long id) {
         return userMapper.deleteById(id) > 0;
     }
+
+    @Override
+    public User getUserByUsername(String username){
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(User::getUsername,username);
+        return userMapper.selectOne(queryWrapper);
+    }
 }
