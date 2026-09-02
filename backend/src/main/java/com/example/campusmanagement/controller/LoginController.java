@@ -17,7 +17,7 @@ public class LoginController {
     public LoginController(LoginService loginService) {this.loginService = loginService;}
 
     @PostMapping
-    public Result<Void> login(@RequestBody LoginRequest request) {
+    public Result<String> login(@RequestBody LoginRequest request) {
         return loginService.login(request.getUsername(), request.getPassword());
     }
 }
