@@ -39,9 +39,11 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public String getCurrentUser(
+    public User getCurrentUser(
             HttpServletRequest request) {
 
-        return (String) request.getAttribute("username");
+        String username = (String) request.getAttribute("username");
+
+        return userService.getUserByUsername(username);
     }
 }

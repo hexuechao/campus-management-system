@@ -1,4 +1,4 @@
-const TOKEN_KEY = 'campus_management_token'
+const TOKEN_KEY = 'team_task_management_token'
 
 export function getToken() {
   return localStorage.getItem(TOKEN_KEY)

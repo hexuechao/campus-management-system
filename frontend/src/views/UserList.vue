@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
 import { createUser, deleteUser, getUserList, updateUser } from '../api/user'
+import { clearCurrentUser } from '../utils/currentUser'
 import { clearToken } from '../utils/token'
 
 const router = useRouter()
@@ -37,7 +38,12 @@ async function loadUsers() {
     users.value = response.data
   } catch (error) {
     console.error('获取用户列表失败：', error)
-    errorMessage.value = '用户列表加载失败，请确认后端服务已经启动。'
+
+    if (error.response?.status === 403) {
+      errorMessage.value = '权限不足，无法访问用户管理'
+    } else if (error.response?.status !== 401) {
+      errorMessage.value = '用户列表加载失败，请确认后端服务已经启动。'
+    }
   } finally {
     loading.value = false
   }
@@ -56,6 +62,7 @@ function handleReset() {
 
 function handleLogout() {
   clearToken()
+  clearCurrentUser()
   router.replace('/login')
 }
 
@@ -163,7 +170,7 @@ onMounted(loadUsers)
 <template>
   <main class="user-list-page">
     <div class="page-header">
-      <h1>校园用户列表</h1>
+      <h1>用户管理</h1>
       <div class="header-actions">
         <el-button type="primary" @click="openCreateDialog">新增用户</el-button>
         <el-button @click="handleLogout">退出登录</el-button>
@@ -193,6 +200,17 @@ onMounted(loadUsers)
       <el-table-column prop="id" label="ID" width="100" />
       <el-table-column prop="username" label="用户名" />
       <el-table-column prop="name" label="姓名" />
+      <el-table-column label="角色" width="120">
+        <template #default="scope">
+          {{
+            scope.row.role === 'ADMIN'
+              ? '管理员'
+              : scope.row.role === 'USER'
+                ? '普通用户'
+                : '-'
+          }}
+        </template>
+      </el-table-column>
       <el-table-column label="状态" width="120">
         <template #default="scope">
           <el-tag :type="scope.row.status === 1 ? 'success' : 'danger'">

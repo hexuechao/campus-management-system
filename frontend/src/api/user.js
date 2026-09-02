@@ -16,3 +16,7 @@ export function updateUser(id, user) {
 export function deleteUser(id) {
   return request.delete(`/api/users/${id}`)
 }
+
+export function getCurrentUser() {
+  return request.get('/api/users/me')
+}
