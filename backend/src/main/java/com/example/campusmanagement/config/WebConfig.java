@@ -1,7 +1,7 @@
 package com.example.campusmanagement.config;
 
-import com.example.campusmanagement.interceptor.AdminInterceptor;
 import com.example.campusmanagement.interceptor.JwtInterceptor;
+import com.example.campusmanagement.interceptor.RoleInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -10,11 +10,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
 
     private final JwtInterceptor jwtInterceptor;
-    private final AdminInterceptor adminInterceptor;
+    private final RoleInterceptor roleInterceptor;
 
-    public WebConfig(JwtInterceptor jwtInterceptor, AdminInterceptor adminInterceptor) {
+    public WebConfig(JwtInterceptor jwtInterceptor, RoleInterceptor roleInterceptor) {
         this.jwtInterceptor = jwtInterceptor;
-        this.adminInterceptor = adminInterceptor;
+        this.roleInterceptor = roleInterceptor;
     }
 
     @Override
@@ -22,13 +22,19 @@ public class WebConfig implements WebMvcConfigurer {
 
         registry.addInterceptor(jwtInterceptor)
                 .addPathPatterns("/api/**")
-                .excludePathPatterns("/api/login",
-                                    "/api/register");
+                .excludePathPatterns(
+                        "/api/login",
+                        "/api/register"
+                )
+                .order(1);
 
-        registry.addInterceptor(adminInterceptor)
-                .addPathPatterns("/api/users/**",
-                                "/api/tasks")
-                .excludePathPatterns("/api/users/me");
+        registry.addInterceptor(roleInterceptor)
+                .addPathPatterns("/api/**")
+                .excludePathPatterns(
+                        "/api/login",
+                        "/api/register"
+                )
+                .order(2);
     }
 
 }

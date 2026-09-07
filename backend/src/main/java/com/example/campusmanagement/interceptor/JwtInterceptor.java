@@ -1,5 +1,8 @@
 package com.example.campusmanagement.interceptor;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.example.campusmanagement.entity.User;
+import com.example.campusmanagement.mapper.UserMapper;
 import com.example.campusmanagement.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -10,9 +13,11 @@ import org.springframework.web.servlet.HandlerInterceptor;
 public class JwtInterceptor implements HandlerInterceptor {
 
     private final JwtUtil jwtUtil;
+    private final UserMapper userMapper;
 
-    public JwtInterceptor(JwtUtil jwtUtil) {
+    public JwtInterceptor(JwtUtil jwtUtil, UserMapper userMapper) {
         this.jwtUtil = jwtUtil;
+        this.userMapper = userMapper;
     }
 
     @Override
@@ -40,6 +45,23 @@ public class JwtInterceptor implements HandlerInterceptor {
         }
 
         String username = jwtUtil.getUsernameFromToken(token);
+
+        User user = userMapper.selectOne(
+                new LambdaQueryWrapper<User>()
+                        .eq(User::getUsername, username)
+        );
+
+        if (user == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return false;
+        }
+
+        if (!Integer.valueOf(1).equals(user.getStatus())) {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            return false;
+        }
+
+        request.setAttribute("currentUser", user);
 
         request.setAttribute("username", username);
 

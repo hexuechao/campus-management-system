@@ -1,5 +1,6 @@
 package com.example.campusmanagement.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.campusmanagement.common.Result;
 import com.example.campusmanagement.dto.CreateTaskRequest;
 import com.example.campusmanagement.entity.Task;
@@ -10,7 +11,10 @@ import com.example.campusmanagement.exception.BusinessException;
 import com.example.campusmanagement.mapper.TaskMapper;
 import com.example.campusmanagement.mapper.UserMapper;
 import com.example.campusmanagement.service.TaskService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class TaskServiceImpl implements TaskService {
@@ -60,5 +64,17 @@ public class TaskServiceImpl implements TaskService {
         taskMapper.insert(task);
 
         return new Result<>(200, "任务创建成功", task);
+    }
+
+    @Override
+    public List<Task> getAllTasks(){
+        return taskMapper.selectList(null);
+    }
+
+    @Override
+    public List<Task> getMyTask(Long userId){
+        LambdaQueryWrapper<Task> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Task::getAssigneeId, userId);
+        return taskMapper.selectList(queryWrapper);
     }
 }
