@@ -25,8 +25,9 @@ public class TaskController {
 
     @RequireRole("ADMIN")
     @PostMapping
-    public Result<Task> createTask(@Valid @RequestBody CreateTaskRequest request) {
-        return taskService.createTask(request);
+    public Result<Task> createTask(@Valid @RequestBody CreateTaskRequest request, HttpServletRequest httpServletRequest) {
+        User currentUser = (User) httpServletRequest.getAttribute("currentUser");
+        return taskService.createTask(request, currentUser);
     }
 
     @RequireRole("ADMIN")
@@ -47,8 +48,7 @@ public class TaskController {
     @PatchMapping("{id}/status")
     public Result<Void> updateTaskStatus(@PathVariable Long id, @Valid @RequestBody UpdateTaskStatusRequest updateTaskStatusRequest, HttpServletRequest request) {
         User currentUser = (User) request.getAttribute("currentUser");
-        Long userId = currentUser.getId();
-        taskService.updateTaskStatus(id, userId, updateTaskStatusRequest.getTaskStatus());
+        taskService.updateTaskStatus(id, currentUser, updateTaskStatusRequest.getTaskStatus());
         return new Result<>(200, "修改成功", null);
     }
 

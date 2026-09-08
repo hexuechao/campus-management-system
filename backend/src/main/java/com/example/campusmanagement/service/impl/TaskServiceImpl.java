@@ -4,10 +4,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.campusmanagement.common.Result;
 import com.example.campusmanagement.dto.CreateTaskRequest;
 import com.example.campusmanagement.entity.Task;
+import com.example.campusmanagement.entity.TaskLog;
 import com.example.campusmanagement.entity.User;
 import com.example.campusmanagement.enums.TaskPriority;
 import com.example.campusmanagement.enums.TaskStatus;
 import com.example.campusmanagement.exception.BusinessException;
+import com.example.campusmanagement.mapper.TaskLogMapper;
 import com.example.campusmanagement.mapper.TaskMapper;
 import com.example.campusmanagement.mapper.UserMapper;
 import com.example.campusmanagement.service.TaskService;
@@ -23,17 +25,20 @@ public class TaskServiceImpl implements TaskService {
 
     private final TaskMapper taskMapper;
     private final UserMapper userMapper;
+    private final TaskLogMapper taskLogMapper;
 
     public TaskServiceImpl(
             TaskMapper taskMapper,
-            UserMapper userMapper) {
+            UserMapper userMapper,
+            TaskLogMapper taskLogMapper) {
 
         this.taskMapper = taskMapper;
         this.userMapper = userMapper;
+        this.taskLogMapper = taskLogMapper;
     }
 
     @Override
-    public Result<Task> createTask(CreateTaskRequest request) {
+    public Result<Task> createTask(CreateTaskRequest request, User currentUser) {
 
         LambdaQueryWrapper<User> userQueryWrapper =
                 new LambdaQueryWrapper<>();
@@ -73,6 +78,14 @@ public class TaskServiceImpl implements TaskService {
 
         taskMapper.insert(task);
 
+        TaskLog taskLog = new TaskLog();
+
+        taskLog.setTaskId(task.getId());
+        taskLog.setOperatorUsername(currentUser.getUsername());
+        taskLog.setAction("CREATE");
+
+        taskLogMapper.insert(taskLog);
+
         return new Result<>(200, "任务创建成功", task);
     }
 
@@ -91,7 +104,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public void updateTaskStatus(
             Long taskId,
-            Long currentUserId,
+            User currentUser,
             TaskStatus newStatus) {
 
         // 1. 查询任务
@@ -103,7 +116,7 @@ public class TaskServiceImpl implements TaskService {
         }
 
         // 3. 判断任务是否属于当前登录用户
-        if (!Objects.equals(task.getAssigneeId(), currentUserId)) {
+        if (!Objects.equals(task.getAssigneeId(), currentUser.getId())) {
             throw new BusinessException(HttpStatus.FORBIDDEN, "无权修改该任务");
         }
 
@@ -127,5 +140,13 @@ public class TaskServiceImpl implements TaskService {
 
         // 7. 更新数据库
         taskMapper.updateById(task);
+
+        TaskLog taskLog = new TaskLog();
+
+        taskLog.setTaskId(taskId);
+        taskLog.setOperatorUsername(currentUser.getUsername());
+        taskLog.setAction(oldStatus + " -> " + newStatus);
+
+        taskLogMapper.insert(taskLog);
     }
 }
