@@ -12,9 +12,11 @@ import com.example.campusmanagement.mapper.TaskMapper;
 import com.example.campusmanagement.mapper.UserMapper;
 import com.example.campusmanagement.service.TaskService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class TaskServiceImpl implements TaskService {
@@ -33,24 +35,32 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public Result<Task> createTask(CreateTaskRequest request) {
 
+        LambdaQueryWrapper<User> userQueryWrapper =
+                new LambdaQueryWrapper<>();
+
+        userQueryWrapper.eq(
+                User::getUsername,
+                request.getAssigneeUsername()
+        );
+
         User assignee =
-                userMapper.selectById(request.getAssigneeId());
+                userMapper.selectOne(userQueryWrapper);
 
         if (assignee == null) {
-            throw new BusinessException("负责人不存在");
+            throw new BusinessException(HttpStatus.NOT_FOUND, "负责人不存在");
         }
         if(assignee.getStatus() != 1) {
-            throw new BusinessException("该用户已被禁用");
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "该用户已被禁用");
         }
         if(!"USER".equals(assignee.getRole())) {
-            throw new BusinessException("只能将任务分配给普通用户");
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "只能将任务分配给普通用户");
         }
 
         Task task = new Task();
 
         task.setTitle(request.getTitle());
         task.setDescription(request.getDescription());
-        task.setAssigneeId(request.getAssigneeId());
+        task.setAssigneeId(assignee.getId());
         task.setDeadline(request.getDeadline());
 
         if (request.getPriority() == null) {
@@ -76,5 +86,46 @@ public class TaskServiceImpl implements TaskService {
         LambdaQueryWrapper<Task> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Task::getAssigneeId, userId);
         return taskMapper.selectList(queryWrapper);
+    }
+
+    @Override
+    public void updateTaskStatus(
+            Long taskId,
+            Long currentUserId,
+            TaskStatus newStatus) {
+
+        // 1. 查询任务
+        Task task = taskMapper.selectById(taskId);
+
+        // 2. 判断任务是否存在
+        if (task == null) {
+            throw new BusinessException(HttpStatus.NOT_FOUND, "任务不存在");
+        }
+
+        // 3. 判断任务是否属于当前登录用户
+        if (!Objects.equals(task.getAssigneeId(), currentUserId)) {
+            throw new BusinessException(HttpStatus.FORBIDDEN, "无权修改该任务");
+        }
+
+        // 4. 获取任务当前状态
+        TaskStatus oldStatus = task.getStatus();
+
+        // 5. 判断状态流转是否合法
+        boolean validTransition =
+                (oldStatus == TaskStatus.TODO
+                        && newStatus == TaskStatus.IN_PROGRESS)
+                        ||
+                        (oldStatus == TaskStatus.IN_PROGRESS
+                                && newStatus == TaskStatus.DONE);
+
+        if (!validTransition) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "非法的任务状态流转");
+        }
+
+        // 6. 修改状态
+        task.setStatus(newStatus);
+
+        // 7. 更新数据库
+        taskMapper.updateById(task);
     }
 }

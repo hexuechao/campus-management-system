@@ -3,9 +3,11 @@ package com.example.campusmanagement.controller;
 import com.example.campusmanagement.annotation.RequireRole;
 import com.example.campusmanagement.common.Result;
 import com.example.campusmanagement.dto.CreateTaskRequest;
+import com.example.campusmanagement.dto.UpdateTaskStatusRequest;
 import com.example.campusmanagement.entity.Task;
 import com.example.campusmanagement.entity.User;
 import com.example.campusmanagement.service.TaskService;
+import com.sun.source.doctree.AttributeTree;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
@@ -40,6 +42,14 @@ public class TaskController {
         Long userId = currentUser.getId();
         List<Task> tasks = taskService.getMyTask(userId);
         return new Result<>(200, "查询成功", tasks);
+    }
+
+    @PatchMapping("{id}/status")
+    public Result<Void> updateTaskStatus(@PathVariable Long id, @Valid @RequestBody UpdateTaskStatusRequest updateTaskStatusRequest, HttpServletRequest request) {
+        User currentUser = (User) request.getAttribute("currentUser");
+        Long userId = currentUser.getId();
+        taskService.updateTaskStatus(id, userId, updateTaskStatusRequest.getTaskStatus());
+        return new Result<>(200, "修改成功", null);
     }
 
 }

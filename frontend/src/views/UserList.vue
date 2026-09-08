@@ -172,6 +172,7 @@ onMounted(loadUsers)
     <div class="page-header">
       <h1>用户管理</h1>
       <div class="header-actions">
+        <el-button @click="router.push('/tasks')">任务管理</el-button>
         <el-button type="primary" @click="openCreateDialog">新增用户</el-button>
         <el-button @click="handleLogout">退出登录</el-button>
       </div>

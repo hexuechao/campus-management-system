@@ -30,10 +30,14 @@ public class GlobalExceptionHandler {
             BusinessException e) {
 
         Result<Void> result =
-                new Result<>(400, e.getMessage(), null);
+                new Result<>(
+                        e.getStatus().value(),
+                        e.getMessage(),
+                        null
+                );
 
         return ResponseEntity
-                .badRequest()
+                .status(e.getStatus())
                 .body(result);
     }
 }

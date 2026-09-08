@@ -31,6 +31,11 @@ const router = createRouter({
       component: () => import('../views/UserList.vue'),
       meta: { requiresAuth: true, requiredRole: 'ADMIN' },
     },
+    {
+      path: '/tasks',
+      component: () => import('../views/TaskList.vue'),
+      meta: { requiresAuth: true, requiredRole: 'ADMIN' },
+    },
   ],
 })
 

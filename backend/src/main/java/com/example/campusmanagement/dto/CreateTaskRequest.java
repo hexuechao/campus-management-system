@@ -18,8 +18,8 @@ public class CreateTaskRequest {
 
     private String description;
 
-    @NotNull(message = "负责人不能为空")
-    private Long assigneeId;
+    @NotBlank(message = "负责人用户名不能为空")
+    private String assigneeUsername;
 
     private TaskPriority priority;
 
